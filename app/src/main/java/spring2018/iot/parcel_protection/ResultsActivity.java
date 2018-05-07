@@ -120,7 +120,7 @@ public class ResultsActivity extends AppCompatActivity {
             pairedDeviceArrayList = new ArrayList<BluetoothDevice>();
 
             for (BluetoothDevice device : pairedDevices){
-                if(device.getName() == ""){ // Need to fill this out with the actual device name
+                if(device.getName() == "HC-06"){ // Need to fill this out with the actual device name
                     parcel = device;
                 }
             }
