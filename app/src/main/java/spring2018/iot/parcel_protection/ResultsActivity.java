@@ -120,7 +120,7 @@ public class ResultsActivity extends AppCompatActivity {
             pairedDeviceArrayList = new ArrayList<BluetoothDevice>();
 
             for (BluetoothDevice device : pairedDevices){
-                if(device.getName() == "HC-06"){ // Need to fill this out with the actual device name
+                if(device.getName().equals("HC-06")){
                     parcel = device;
                 }
             }
@@ -316,8 +316,6 @@ Background Thread to handle BlueTooth connecting
         public void run() {
             byte[] buffer = new byte[1024];
             int bytes;
-
-            String strRx = "";
 
             while (true) {
                 try {
