@@ -25,21 +25,6 @@ public class MainActivity extends AppCompatActivity {
         Button initButton = (Button)findViewById(R.id.initializeButton);
         Button resultsButton = (Button)findViewById(R.id.getDataButton);
 
-        if(!bt.isBluetoothAvailable()) {
-            Toast.makeText(getApplicationContext()
-                    , "Bluetooth is not available"
-                    , Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
-        bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
-            public void onDataReceived(byte[] data, String message) {
-                Toast.makeText(getApplicationContext()
-                        , message + "\n"
-                        , Toast.LENGTH_LONG).show();
-            }
-        });
-
         initButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
