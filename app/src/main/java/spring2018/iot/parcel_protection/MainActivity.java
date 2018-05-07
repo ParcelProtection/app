@@ -14,14 +14,11 @@ import app.akexorcist.bluetotohspp.library.DeviceList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private BluetoothSPP bt;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bt = new BluetoothSPP(this);
         Button initButton = (Button)findViewById(R.id.initializeButton);
         Button resultsButton = (Button)findViewById(R.id.getDataButton);
 
@@ -39,26 +36,4 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    //stop this bluetooth service when App is destroyed.
-    public void onDestroy() {
-        super.onDestroy();
-        bt.stopService();
-    }
-
-    public void onStart() {
-        super.onStart();
-        //enable bluetooth and bt service.
-        if (!bt.isBluetoothEnabled()) {
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, BluetoothState.REQUEST_ENABLE_BT);
-        } else {
-            if(!bt.isServiceAvailable()) {
-                bt.setupService();
-                bt.startService(BluetoothState.DEVICE_ANDROID);
-            }
-        }
-    }
-
-
 }
