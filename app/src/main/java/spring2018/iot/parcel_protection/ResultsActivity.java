@@ -21,9 +21,12 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static app.akexorcist.bluetotohspp.library.BluetoothState.REQUEST_ENABLE_BT;
 
@@ -314,34 +317,74 @@ Background Thread to handle BlueTooth connecting
 
         @Override
         public void run() {
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[2];
+            byte[] payload_header = new byte[4];
+            byte[] event0 = new byte[4];
+            byte[] event1 = new byte[4];
+            byte[] event2 = new byte[4];
+            byte[] event3 = new byte[4];
+            byte[] crc = new byte[1];
             int bytes;
+            try {
+                String strReceived = "";
+                connectedInputStream.read(buffer, 0, 2);
+                int payload_len = buffer[1];
+                Log.i("Confirmation Recieved", Integer.toString(payload_len));
+                if(buffer[0] == -126){
+                    Log.i("Reading Payload Header", "Confirmed");
+                    connectedInputStream.read(payload_header, 0, 4);
+                    int numEvents = payload_header[3];
+                    Log.i("Payload Header Recieved", Integer.toString(numEvents));
+                    for(int i=0; i < numEvents; i++){
+                        connectedInputStream.read(event0, 0, 4);
+                        connectedInputStream.read(event1, 0, 4);
+                        connectedInputStream.read(event2, 0, 4);
+                        connectedInputStream.read(event3, 0, 4);
+                        TimeUnit.MILLISECONDS.sleep(500);
+                        if (event0[3] == 0) {
+                            strReceived += "    DROP\t";
+                            Log.i("Event Added", "DROP");
+                        } else if (event0[3] == 1) {
+                            strReceived += "    FLIP\t\t\t";
+                            Log.i("Event Added", "FLIP");
+                        }
 
-            while (true) {
-                try {
-                    bytes = connectedInputStream.read(buffer);
-                    final String strReceived = new String(buffer, 0, bytes);
+                        int year = 2018;
+                        int month = event2[1];
+                        int dow = event2[2];
+                        int day = event2[3];
+                        int hour = event3[0];
+                        int minute = event3[1];
+                        int second = event3[2];
 
-                    runOnUiThread(new Runnable(){
+                        strReceived += "                  " + month + "/" + day + "/" + year;
 
-                        @Override
-                        public void run() {
-                            textRead.append(strReceived);
-                        }});
-
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-
-                    final String msgConnectionLost = "Connection lost:\n"
-                            + e.getMessage();
-                    runOnUiThread(new Runnable(){
-
-                        @Override
-                        public void run() {
-                            textStatus.setText(msgConnectionLost);
-                        }});
+                        strReceived += "\n";
+                    }
+                    connectedInputStream.read(crc, 0, 1);
                 }
+                final String finalString = strReceived;
+                runOnUiThread(new Runnable(){
+
+                    @Override
+                    public void run() {
+                        textRead.append(finalString);
+                    }});
+
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+
+                final String msgConnectionLost = "Connection lost:\n"
+                        + e.getMessage();
+                runOnUiThread(new Runnable(){
+
+                    @Override
+                    public void run() {
+                        textStatus.setText(msgConnectionLost);
+                    }});
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
